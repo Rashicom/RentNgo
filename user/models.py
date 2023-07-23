@@ -44,9 +44,8 @@ class CustomUser(AbstractUser):
     last_name = None
 
     # extra fields
-    user_id = models.AutoField(primary_key=True)
     email = models.EmailField(unique=True)
-    user_otp = models.CharField(max_length=10)
+    user_otp = models.CharField(max_length=10, blank=True, null=True)
     contact_number = models.CharField(max_length=12)
     profile_photo = models.ImageField(upload_to="Profile_photos", null=True, blank=True)
     age = models.IntegerField()
