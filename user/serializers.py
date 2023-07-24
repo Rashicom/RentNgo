@@ -25,4 +25,10 @@ class Address_serializer(serializers.Serializer):
     city = serializers.CharField(required = True)
     zip_code = serializers.ImageField(required = True)
     contact_number = serializers.CharField(max_length=12, null=True, blank=True)
-    
+
+
+# update image serializer
+class Update_image_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields=['profile_photo']

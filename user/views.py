@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from django.http import HttpResponse
 from rest_framework.response import Response
-from .serializers import Signup_serializer_user, Login_serializer_user, Address_serializer
+from .serializers import Signup_serializer_user, Login_serializer_user, Address_serializer, Update_image_serializer
 from .models import Wallet, Wallet_transaction, Countries, States, Address
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
@@ -117,16 +117,45 @@ class add_address(APIView):
             first country table, then usng the country instance state table is updated
             then only address table is updated
             """
-            pass
-            # updation country table
+            
+            try:
+                # updation country table
+                # created is true if record created, return false if record fetched
+                new_country, country_created = Countries.objects.get_or_create(country = request.data['country'])
+
+                # using country state instence is fetched if exist, created if state_created is true
+                new_state, state_created = States.objects.get_or_create(country_id = new_country, state = request.data['state'])
+                
+                # update address table
+                # new_state is needed to update address tabel,
+                # becouse address table referencing state table
+                new_address = Address(user_id=user, state_id=new_state, address=request.data['address'], place=request.data['place'], city=request.date['city'], zip_code=request.data['zip_code'], contact_number=request.data.get('contact_number'))
+                
+                # return response
+                return Response(new_address, status=201)
+
+            except Exception as e:
+                print("exception found")
+                print(e)
+                return Response({"details":"somthing went wrong"},status=403)
+
 
 
 # update profile picture
 class update_profile_photo(APIView):
     
     permission_classes = [IsAuthenticated]
-    
+    serialzier_class = Update_image_serializer
     def patch(self, request, format=None):
-        pass
-
+        
+        # fetching data(profile photo), and serializing it
+        serialized_data = self.serialzier_class(data=request.data)
+        
+        # validating data
+        if serialized_data.is_valid(raise_exception=True):
+            serialized_data.save()
+            
+            # returning response
+            return Response({"details":"created"},status=201)
+        
 
