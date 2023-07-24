@@ -24,7 +24,7 @@ class Address_serializer(serializers.Serializer):
     place = serializers.CharField(required = True)
     city = serializers.CharField(required = True)
     zip_code = serializers.ImageField(required = True)
-    contact_number = serializers.CharField(max_length=12, null=True, blank=True)
+    contact_number = serializers.CharField(max_length=12, required = False)
 
 
 # update image serializer
