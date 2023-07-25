@@ -23,7 +23,7 @@ class Address_serializer(serializers.Serializer):
     address = serializers.CharField(required = True)
     place = serializers.CharField(required = True)
     city = serializers.CharField(required = True)
-    zip_code = serializers.ImageField(required = True)
+    zip_code = serializers.IntegerField(required = True)
     contact_number = serializers.CharField(max_length=12, required = False)
 
 

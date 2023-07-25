@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-b_bpon!dygey@m#vw!$v%!&ueqg9jrn95$40xhw%l0))of-e=&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',
     'user',
     'vehicles',
     'rental_management',
@@ -56,12 +58,17 @@ MIDDLEWARE = [
 ]
 
 
-REST_FRAMEWORK = {
 
+REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
-   
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
 

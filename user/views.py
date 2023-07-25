@@ -8,6 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.db import transaction
 # Create your views here.
 
 
@@ -80,7 +81,7 @@ class login(APIView):
                 print("login success")
                 # generating jwt tocken
                 refresh = RefreshToken.for_user(user)
-                access = refresh.access_tocken
+                access = refresh.access_token
                 
                 # returning response with access and refresh tocken
                 # refresh tocken used to generate new tocken before tockens session expired
@@ -104,6 +105,8 @@ class add_address(APIView):
 
     permission_classes = [IsAuthenticated]
     serializer_class = Address_serializer
+
+    @transaction.atomic
     def post(self, request, format=None):
         
         # fetching data
@@ -119,6 +122,8 @@ class add_address(APIView):
             """
             
             try:
+                
+
                 # updation country table
                 # created is true if record created, return false if record fetched
                 new_country, country_created = Countries.objects.get_or_create(country = request.data['country'])
@@ -129,10 +134,11 @@ class add_address(APIView):
                 # update address table
                 # new_state is needed to update address tabel,
                 # becouse address table referencing state table
-                new_address = Address(user_id=user, state_id=new_state, address=request.data['address'], place=request.data['place'], city=request.date['city'], zip_code=request.data['zip_code'], contact_number=request.data.get('contact_number'))
-                
+                new_address = Address(user_id=user, state_id=new_state, address=request.data['address'], place=request.data['place'], city=request.data['city'], zip_code=request.data['zip_code'], contact_number=request.data.get('contact_number'))
+                new_address.save()
+
                 # return response
-                return Response(new_address, status=201)
+                return Response(serialized_data.data, status=201)
 
             except Exception as e:
                 print("exception found")
@@ -159,3 +165,15 @@ class update_profile_photo(APIView):
             return Response({"details":"created"},status=201)
         
 
+
+
+
+# ////////////////////// authentication api ////////////////////////
+
+# checking tocken is valied or not
+class ckeck_tocken(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, format=None):
+        return Response({"details":"valied tocken"},status=200)
