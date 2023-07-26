@@ -32,3 +32,10 @@ class Update_image_serializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields=['profile_photo']
+    
+
+class Edit_address_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = '__all__'
+        

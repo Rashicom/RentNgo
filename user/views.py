@@ -2,12 +2,13 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from django.http import HttpResponse
 from rest_framework.response import Response
-from .serializers import Signup_serializer_user, Login_serializer_user, Address_serializer, Update_image_serializer
+from .serializers import Signup_serializer_user, Login_serializer_user, Address_serializer, Update_image_serializer,Edit_address_serializer
 from .models import Wallet, Wallet_transaction, Countries, States, Address
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.authentication import authenticate
 from django.db import transaction
 # Create your views here.
 
@@ -44,6 +45,7 @@ class signup(APIView):
             new_wallet = Wallet(user_id = user)
             new_wallet.save()
 
+            # removing password from response and send response
             response_data.pop('password')
             print("user created")
             return Response(response_data,status=201)
@@ -121,9 +123,7 @@ class add_address(APIView):
             then only address table is updated
             """
             
-            try:
-                
-
+            try:   
                 # updation country table
                 # created is true if record created, return false if record fetched
                 new_country, country_created = Countries.objects.get_or_create(country = request.data['country'])
@@ -155,7 +155,7 @@ class update_profile_photo(APIView):
     def patch(self, request, format=None):
         
         # fetching data(profile photo), and serializing it
-        serialized_data = self.serialzier_class(data=request.data)
+        serialized_data = self.serialzier_class(request.user,data=request.data)
         
         # validating data
         if serialized_data.is_valid(raise_exception=True):
@@ -164,8 +164,37 @@ class update_profile_photo(APIView):
             # returning response
             return Response({"details":"created"},status=201)
         
+# edit address
+class edit_address(APIView):
 
+    permission_classes=[IsAuthenticated]
+    serializer_class = Edit_address_serializer
+    def patch(self, request, format=None):
+        """
+        updating user address details
+        """
+        address_instence = Address.objects.get(user_id = request.user)
+        # serializing data
+        serialized_data = self.serializer_class(address_instence,data = request.data, partial=True)
+        
+        # validating serialized data
+        # if any exception found exception implicitly send back to frondend
+        # raise_exception responsible for implicit return
+        if serialized_data.is_valid(raise_exception=True):
+            """
+            serializer model class Address have one forign key.
+            if the user wants to update the state or country we have to fetch the insance of the country or state
+            and update in in the address side 
+            """
 
+            try:
+                serialized_data.save()
+                return Response(serialized_data.data, status=201)
+            except Exception as e:
+                print(e)
+                return Response({"details": "something went wrong"},status=403)
+
+        
 
 
 # ////////////////////// authentication api ////////////////////////
@@ -177,3 +206,5 @@ class ckeck_tocken(APIView):
 
     def post(self, request, format=None):
         return Response({"details":"valied tocken"},status=200)
+    
+
