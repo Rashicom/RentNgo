@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from django.http import HttpResponse
 from rest_framework.response import Response
-from .serializers import Signup_serializer_user, Login_serializer_user, Address_serializer, Update_image_serializer,Edit_address_serializer
+from .serializers import Signup_serializer_user, Login_serializer_user, Address_serializer, Update_image_serializer,Edit_address_serializer, Wallet_transactions_serializer
 from .models import Wallet, Wallet_transaction, Countries, States, Address
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
@@ -208,8 +208,12 @@ class get_address(APIView):
         # fetching user address details. using value() we can get dict
         # insted of query set.
         user = request.user
-        address_instence = Address.objects.select_related("state_id").get(user_id = user)
-       
+        try:
+            address_instence = Address.objects.select_related("state_id").get(user_id = user)
+        except Exception as e:
+                    print(e)
+                    return Response({"details":"user not found"},status=404)
+        
         # serializing data
         serialized_data = self.seriallizer_class(
             data={
@@ -232,7 +236,7 @@ class get_address(APIView):
 
 
 # wallet balance
-class wallet_balance(APIView):
+class get_wallet_balance(APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -245,12 +249,34 @@ class wallet_balance(APIView):
         return Response({"balance":wallet_instence.account_balance},status=200)
 
 
-
-class get_wallet_transactions(APIView):
+# get vallet transaction by transactin id
+class get_wallet_transaction(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = Wallet_transactions_serializer
 
     def get(self, request, format=None):
-        pass
+        """
+        thier function searching for a prticular transaction by transaction id
+        which given by the user and fetching the transactin details and send back
+        """
+
+        # fetching data from params
+        wallet_transaction_id = request.query_params.get('wallet_transaction_id')
+        
+        # fetching transaction details by given transaction id
+        try:
+            transaction = Wallet_transaction.objects.get(wallet_transaction_id = wallet_transaction_id)
+        except Exception as e:
+            print(e)
+            return Response({"details":"transaction not found"},status=404)
+
+        # serializing data if the tranacion found
+        serialized_data = self.serializer_class(data=transaction)
+
+        if serialized_data.is_valid():
+            return Response(serialized_data.data,status=200)
+        else:
+            return Response({"details":"something went wrong"},status=403)   
 
 
 

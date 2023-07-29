@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Address
+from .models import CustomUser, Address,Wallet , Wallet_transaction
 
 class Signup_serializer_user(serializers.ModelSerializer):
     class Meta:
@@ -39,3 +39,8 @@ class Edit_address_serializer(serializers.ModelSerializer):
         model = Address
         fields = '__all__'
         
+
+class Wallet_transactions_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Wallet_transaction
+        fields = '__all__'
