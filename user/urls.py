@@ -8,6 +8,8 @@ urlpatterns = [
     path('add_address/', views.add_address.as_view()),
     path('update_profile_photo/', views.update_profile_photo.as_view()),
     path('edit_address/', views.edit_address.as_view()),
+    path('wallet_balance/', views.wallet_balance.as_view()),
+    path('get_address/', views.get_address.as_view()),
     
     
     

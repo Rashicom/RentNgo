@@ -186,7 +186,7 @@ class edit_address(APIView):
             if the user wants to update the state or country we have to fetch the insance of the country or state
             and update in in the address side 
             """
-
+            
             try:
                 serialized_data.save()
                 return Response(serialized_data.data, status=201)
@@ -194,7 +194,74 @@ class edit_address(APIView):
                 print(e)
                 return Response({"details": "something went wrong"},status=403)
 
-        
+# get address
+class get_address(APIView):
+
+    permission_classes = [IsAuthenticated]
+    seriallizer_class = Address_serializer
+
+    def get(self, request, format=None):
+        """
+        fetching user address details
+        """
+
+        # fetching user address details. using value() we can get dict
+        # insted of query set.
+        user = request.user
+        address_instence = Address.objects.select_related("state_id").get(user_id = user)
+       
+        # serializing data
+        serialized_data = self.seriallizer_class(
+            data={
+                "state": address_instence.state_id.state,
+                "country": address_instence.state_id.country_id.country,
+                "address": address_instence.address,
+                "place": address_instence.place,
+                "city": address_instence.city,
+                "zip_code": address_instence.zip_code,
+                "contact_number": address_instence.contact_number
+            }
+        )
+
+        if serialized_data.is_valid():
+            
+            return Response(serialized_data.validated_data,status=200)
+        else:
+            return Response({"details":"something went wrong"},status=403)
+
+
+
+# wallet balance
+class wallet_balance(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        """
+        fetching user wallet balance
+        """
+        user = request.user
+        wallet_instence = Wallet.objects.get(user_id = user)
+        return Response({"balance":wallet_instence.account_balance},status=200)
+
+
+
+class get_wallet_transactions(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        pass
+
+
+
+# transaction history
+class trasaction_history(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+
+        pass
 
 
 # ////////////////////// authentication api ////////////////////////
@@ -206,5 +273,5 @@ class ckeck_tocken(APIView):
 
     def post(self, request, format=None):
         return Response({"details":"valied tocken"},status=200)
-    
+        
 
