@@ -321,7 +321,7 @@ class get_wallet_balance(APIView):
 # get vallet transaction by transactin id
 class get_wallet_transaction(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = Wallet_transactions_serializer
+    serializer_class = Wallet_transactions_table_serializer
 
     def get(self, request, format=None):
         """
@@ -339,13 +339,10 @@ class get_wallet_transaction(APIView):
             print(e)
             return Response({"details":"transaction not found"},status=404)
 
-        # serializing data if the tranacion found
-        serialized_data = self.serializer_class(data=transaction)
-
-        if serialized_data.is_valid():
-            return Response(serialized_data.data,status=200)
-        else:
-            return Response({"details":"something went wrong"},status=403)   
+        # serializing data if the tranacion found and return
+        serialized_data = self.serializer_class(transaction)
+        return Response(serialized_data.data,status=200)
+        
 
 
 
@@ -353,7 +350,7 @@ class get_wallet_transaction(APIView):
 class trasaction_history(APIView):
 
     permission_classes = [IsAuthenticated]
-    serializer_class = Wallet_transactions_serializer
+    serializer_class = Wallet_transactions_table_serializer
 
     def get(self, request, format=None):
         """
@@ -372,10 +369,10 @@ class trasaction_history(APIView):
 
         # filtering logic
         if date_from == None:
-            transactions = Q(wallet_id=wallet_instance) and Q(wallet_transaction_date__lte=date_to)
+            transactions = Q(wallet_id=wallet_instance) & Q(wallet_transaction_date__lte=date_to)
         
-        transactions = Q(wallet_id=wallet_instance) and Q(wallet_transaction_date__lte = date_to) and Q(wallet_transaction_date__gte = date_from)
-
+        else:
+            transactions = Q(wallet_id=wallet_instance) & Q(wallet_transaction_date__lte = date_to) & Q(wallet_transaction_date__gte = date_from)
 
         # filtering wallet transaction history and serializing data
         transactions = Wallet_transaction.objects.filter(transactions)
