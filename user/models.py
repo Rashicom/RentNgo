@@ -94,7 +94,7 @@ class Wallet(models.Model):
 
 # wallter transaction
 class Wallet_transaction(models.Model):
-
+    
     # choices
     class wallet_transaction_type_chices(models.TextChoices):
         DEPOSIT = "DEPOSIT",
@@ -106,3 +106,5 @@ class Wallet_transaction(models.Model):
     wallet_transaction_type = models.CharField(max_length=50, choices=wallet_transaction_type_chices.choices)
     wallet_transaction_date = models.DateField(auto_now_add=True)
     wallet_transaction_status = models.BooleanField(default=True)
+    wallet_transaction_amount = models.IntegerField()
+    

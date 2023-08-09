@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from django.http import HttpResponse
 from rest_framework.response import Response
-from .serializers import Signup_serializer_user, Login_serializer_user, Address_serializer, Update_image_serializer,Edit_address_serializer, Wallet_transactions_serializer
+from .serializers import Signup_serializer_user, Login_serializer_user, Address_serializer, Update_image_serializer,Edit_address_serializer, Wallet_transactions_serializer, Wallet_transactions_table_serializer
 from .models import Wallet, Wallet_transaction, Countries, States, Address
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
@@ -10,6 +10,8 @@ from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authentication import authenticate
 from django.db import transaction
+from datetime import date
+from django.db.models import Q
 # Create your views here.
 
 
@@ -234,6 +236,50 @@ class get_address(APIView):
             return Response({"details":"something went wrong"},status=403)
 
 
+# new transaction
+class new_transaction(APIView):
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = Wallet_transactions_serializer
+
+    def post(self, request, format=None):
+        """
+        fetching user and amound to be paid from the request and update
+        """
+
+        # fetching data and get wallet instence to update wattet transaction
+        user = request.user
+        wallet_instance = Wallet.objects.get(user_id = user)
+
+        # serializing data
+        serialized_data = self.serializer_class(data=request.data)
+        
+        # returning serializing error implicitly to the frond end.
+        if serialized_data.is_valid(raise_exception=True):
+            """
+            fetch the data from the serailized data and update the data base
+            then serializing the data and return back to user
+            """
+            
+            wallet_transaction_type = serialized_data.validated_data.get('wallet_transaction_type')
+            wallet_transaction_amount = serialized_data.validated_data.get('wallet_transaction_amount')
+
+            try:
+                # creatiing wallet transaction and return response
+                new_transaction = Wallet_transaction.objects.create(wallet_id = wallet_instance, wallet_transaction_type = wallet_transaction_type, wallet_transaction_amount = wallet_transaction_amount)
+
+            except Exception as e:
+                print(e)
+                return Response({"details":"something went wrong"},status=403)
+
+            # serializing the new transaction and return back to user
+            # here a new serializer is used to return all data, class serializer only return type and amount
+            transaction_serializer = Wallet_transactions_table_serializer(new_transaction)
+            
+            return Response(transaction_serializer.data,status=201)
+
+
+
 
 # wallet balance
 class get_wallet_balance(APIView):
@@ -284,10 +330,35 @@ class get_wallet_transaction(APIView):
 class trasaction_history(APIView):
 
     permission_classes = [IsAuthenticated]
+    serializer_class = Wallet_transactions_serializer
 
     def get(self, request, format=None):
+        """
+        filtering the users transaction history by date
+        date_from is set to today date if date_from is not provided
+        and to date set to None
+        """
 
-        pass
+        # fetching data from params
+        date_from = request.query_params.get('date_from', None)
+        date_to = request.query_params.get('date_to', date.today())
+
+        # wallet instance to filter
+        user = request.user
+        wallet_instance = Wallet.objects.get(user_id=user)
+
+        # filtering logic
+        if date_from == None:
+            transactions = Q(wallet_id=wallet_instance) and Q(wallet_transaction_date__lte=date_to)
+        
+        transactions = Q(wallet_id=wallet_instance) and Q(wallet_transaction_date__lte = date_to) and Q(wallet_transaction_date__gte = date_from)
+
+
+        # filtering wallet transaction history and serializing data
+        transactions = Wallet_transaction.objects.filter(transactions)
+        serialized_data = self.serializer_class(transactions, many=True)
+        
+        return Response(serialized_data.data, status=200)
 
 
 # ////////////////////// authentication api ////////////////////////

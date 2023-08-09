@@ -43,4 +43,11 @@ class Edit_address_serializer(serializers.ModelSerializer):
 class Wallet_transactions_serializer(serializers.ModelSerializer):
     class Meta:
         model = Wallet_transaction
+        fields = ['wallet_transaction_type','wallet_transaction_amount']
+
+
+class Wallet_transactions_table_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Wallet_transaction
         fields = '__all__'
+
