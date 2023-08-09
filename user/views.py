@@ -259,10 +259,33 @@ class new_transaction(APIView):
             """
             fetch the data from the serailized data and update the data base
             then serializing the data and return back to user
+
+            before updating the database we have to check the transaction type,
+            and check the balance in the wallet to make a succussfull update,
+            otherwise it returns a insufficiant balance warning
             """
             
             wallet_transaction_type = serialized_data.validated_data.get('wallet_transaction_type')
             wallet_transaction_amount = serialized_data.validated_data.get('wallet_transaction_amount')
+
+            # buissiness logic for wallet balence cross match and upation
+            # if the type is withdrowel
+            if wallet_transaction_type == "WITHDRAWAL":
+                """
+                only withdrow the money from wallet if there are sufficient balance in the account
+                otherwise it returns insufficiant balance
+                """
+                if wallet_transaction_amount > wallet_instance.account_balance:
+                    return Response({"details":"insufficient balance"},status=403)
+                else:
+                    wallet_instance.account_balance = wallet_instance.account_balance - wallet_transaction_amount
+            
+            # if the type is deposit
+            elif wallet_transaction_type == "DEPOSIT":
+                wallet_instance.account_balance += wallet_transaction_amount
+            
+            # save the wallet instence
+            wallet_instance.save()
 
             try:
                 # creatiing wallet transaction and return response
