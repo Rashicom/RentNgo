@@ -13,6 +13,7 @@ class Vehicle_category(models.Model):
         THREE_WHEELER = "THREE_WHEELER",
         FOUR_WHEELER = "FOUR_WHEELER",
         HEAVY_VEHICLE = "HEAVY_VEHICLE",
+        OTHER_VEHICLE = "OTHER_VEHICLE",
 
     vehicle_category_id = models.AutoField(primary_key=True)
 
@@ -32,6 +33,7 @@ class Vehicle_sub_category(models.Model):
         AUTO = "AUTO",
         TRUCK = "TRUCK",
         LORRY = "LORRY",
+        OTHER = "OTHER",
 
     vehicle_sub_category_id = models.AutoField(primary_key=True)
     vehicle_category_id = models.ForeignKey(Vehicle_category, on_delete=models.CASCADE)
