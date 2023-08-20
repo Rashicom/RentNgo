@@ -61,13 +61,10 @@ class register_vehicle(APIView):
         vehicle_instance = vehicles_srlzr.save(user_id=request.user,vehicle_model_id=vehicle_model_instance)
         print("final vehicle updated")
 
-        
-
 
         # new we have to update all the 6 tables which is connected by forign keys
         # we are using atomic transaction to roll back all table commits if any table updation files
         
-
         
         return Response(serializer.data)
 

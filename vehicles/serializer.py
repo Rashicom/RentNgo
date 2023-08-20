@@ -6,6 +6,12 @@ class vehicle_category_serializer(serializers.ModelSerializer):
         model = Vehicle_category
         fields = '__all__'
     
+    # save() internally calling the create methord so we are overriding the create method
+    # overridign create methord to get_or_create to avoide recreating the excisting data
+    def create(self, validated_data):
+        instance = Vehicle_category.objects.get_or_create(**validated_data)
+        return instance
+
 
 class vehicle_sub_category_serializer(serializers.ModelSerializer):
     
@@ -13,11 +19,24 @@ class vehicle_sub_category_serializer(serializers.ModelSerializer):
         model = Vehicle_sub_category
         fields = ['vehicle_sub_category']
     
+    # save() internally calling the create methord so we are overriding the create method
+    # overridign create methord to get_or_create to avoide recreating the excisting data
+    def create(self, validated_data):
+        instance = Vehicle_sub_category.objects.get_or_create(**validated_data)
+        return instance
+
+    
 
 class vehicle_company_serializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle_company
         fields = '__all__'
+
+    # save() internally calling the create methord so we are overriding the create method
+    # overridign create methord to get_or_create to avoide recreating the excisting data
+    def create(self, validated_data):
+        instance = Vehicle_company.objects.get_or_create(**validated_data)
+        return instance
     
 
 class vehicle_model_serializer(serializers.ModelSerializer):
@@ -25,6 +44,14 @@ class vehicle_model_serializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle_model
         fields = ['color','vehicle_model_name']
+    
+    # save() internally calling the create methord so we are overriding the create method
+    # overridign create methord to get_or_create to avoide recreating the excisting data
+    def create(self, validated_data):
+        instance = Vehicle_model.objects.get_or_create(**validated_data)
+        return instance
+
+
 
 class vehicles_serializer(serializers.ModelSerializer):
 
