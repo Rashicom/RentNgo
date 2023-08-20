@@ -230,7 +230,6 @@ class get_address(APIView):
         )
 
         if serialized_data.is_valid():
-            
             return Response(serialized_data.validated_data,status=200)
         else:
             return Response({"details":"something went wrong"},status=403)

@@ -53,28 +53,24 @@ class Vehicle_company(models.Model):
 #vehicle model 
 class Vehicle_model(models.Model):
     vehicle_model_id = models.AutoField(primary_key=True)
-    vehicle_company_id = models.ForeignKey(Vehicle_company, on_delete=models.CASCADE)
+    vehicle_company_id = models.ForeignKey(Vehicle_company,on_delete=models.CASCADE)
     vehicle_sub_category_id = models.ForeignKey(Vehicle_sub_category, on_delete=models.CASCADE)
 
+    color = models.CharField(max_length=10)
     vehicle_model_name = models.CharField(max_length=50)
 
-class Color(models.Model):
-    color_id = models.AutoField(primary_key=True)
-    vehicle_model_id = models.ForeignKey(Vehicle_model, on_delete=models.CASCADE)
-
-
+    
 
 # vehicles
 class Vehicles(models.Model):
-    
+
     vehicle_id = models.AutoField(primary_key=True)
     user_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    vehicle_sub_category_id = models.ForeignKey(Vehicle_sub_category, on_delete=models.CASCADE)
     vehicle_model_id = models.ForeignKey(Vehicle_model, on_delete=models.CASCADE)
 
     vehicle_no = models.CharField(max_length=50, unique=True)
     available_from = models.DateField(auto_now_add=True)
-    available_to = models.DateField(auto_now_add=True)
+    available_to = models.DateField()
     rent = models.IntegerField()
 
 

@@ -4,6 +4,6 @@ from . import views
 
 urlpatterns = [
     path('register_vehicle/', views.register_vehicle.as_view()),
-
+    
     
 ]
