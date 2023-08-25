@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Vehicles, CustomUser, Vehicle_sub_category, Vehicle_category, Vehicle_company, Vehicle_model
+from .models import Vehicles, CustomUser, Vehicle_sub_category, Vehicle_category, Vehicle_company, Vehicle_model, Vehicle_images
 
 class vehicle_category_serializer(serializers.ModelSerializer):
     class Meta:
@@ -28,9 +28,17 @@ class vehicle_sub_category_serializer(serializers.ModelSerializer):
     
 
 class vehicle_company_serializer(serializers.ModelSerializer):
+    """
+    company name is set to be unique in the models.py.
+    so the seriazer check the uniqueness for the given value.
+    we dont want to check when it serializing , becouse we use get_or_create method in the serializer create method
+    if a value already exsist its geting instence insted of creating. so we override the checking from database 
+    """
+    company_name = serializers.CharField(required=True)
+
     class Meta:
         model = Vehicle_company
-        fields = '__all__'
+        fields = ['company_name']
 
     # save() internally calling the create methord so we are overriding the create method
     # overridign create methord to get_or_create to avoide recreating the excisting data
@@ -58,6 +66,9 @@ class vehicles_serializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicles
         fields = ['vehicle_no','available_from','available_to','rent']
+
+    
+    
 
 
 class vehicle_registraion_serializer(serializers.Serializer):

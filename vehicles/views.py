@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from django.db import transaction
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializer import vehicle_registraion_serializer, vehicle_category_serializer,vehicle_sub_category_serializer,vehicle_company_serializer,vehicle_model_serializer, vehicles_serializer
-
+from .models import Vehicle_images
 # Create your views here.
 
 
@@ -22,8 +22,8 @@ class register_vehicle(APIView):
         then validate with all tables and save
         """
         
+        
         print("vihicle registration request hit")
-
         # serializing data
         serializer = self.serialiser_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -33,39 +33,40 @@ class register_vehicle(APIView):
         # vehicle category
         vehicle_category_srlzr = vehicle_category_serializer(data=request.data)
         vehicle_category_srlzr.is_valid(raise_exception=True)
-        vehicle_category_instance = vehicle_category_srlzr.save()
+        vehicle_category_instance,_ = vehicle_category_srlzr.save()
         print("vehicle category updated")
 
         # vehicle sub category
         vehicle_sub_category_srlzr = vehicle_sub_category_serializer(data=request.data)
         vehicle_sub_category_srlzr.is_valid(raise_exception=True)
-        vehicle_sub_category_instance = vehicle_sub_category_srlzr.save(vehicle_category_id=vehicle_category_instance)
+        vehicle_sub_category_instance,_ = vehicle_sub_category_srlzr.save(vehicle_category_id=vehicle_category_instance)
         print("vihicle sub category added")
         
         # vehicle company
         vehicle_company_srlzr = vehicle_company_serializer(data=request.data)
         vehicle_company_srlzr.is_valid(raise_exception=True)
-        vehicle_company_instance = vehicle_company_srlzr.save()
+        vehicle_company_instance,_ = vehicle_company_srlzr.save()
         print("vehicle company updated")
 
         # vehicle model
         vehicle_model_srlzr = vehicle_model_serializer(data=request.data)
         vehicle_model_srlzr.is_valid(raise_exception=True)
-        vehicle_model_instance = vehicle_model_srlzr.save(vehicle_company_id=vehicle_company_instance,vehicle_sub_category_id=vehicle_sub_category_instance)
+        vehicle_model_instance,_= vehicle_model_srlzr.save(vehicle_company_id=vehicle_company_instance,vehicle_sub_category_id=vehicle_sub_category_instance)
         print("vehicle model updated")
         
-
         # vehicle
         vehicles_srlzr = vehicles_serializer(data=request.data)
         vehicles_srlzr.is_valid(raise_exception=True)
         vehicle_instance = vehicles_srlzr.save(user_id=request.user,vehicle_model_id=vehicle_model_instance)
         print("final vehicle updated")
 
-
-        # new we have to update all the 6 tables which is connected by forign keys
-        # we are using atomic transaction to roll back all table commits if any table updation files
-        
-        
+        # vehicle image
+        # multiple images
+        images = request.FILES.getlist('image')
+        for img in images:
+            print(img)
+            new_image = Vehicle_images(image=img, vehicle_id=vehicle_instance)
+            new_image.save()
         return Response(serializer.data)
 
 

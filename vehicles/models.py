@@ -81,3 +81,4 @@ class Vehicle_images(models.Model):
     vehicle_id = models.ForeignKey(Vehicles, on_delete=models.CASCADE)
 
     image = models.ImageField(upload_to="vehicle_images")
+
