@@ -71,6 +71,7 @@ class Vehicles(models.Model):
     vehicle_no = models.CharField(max_length=50, unique=True)
     available_from = models.DateField(auto_now_add=True)
     available_to = models.DateField()
+    is_available = models.BooleanField(default=True)
     rent = models.IntegerField()
 
 

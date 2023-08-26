@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Vehicles, CustomUser, Vehicle_sub_category, Vehicle_category, Vehicle_company, Vehicle_model, Vehicle_images
+from .models import Vehicles, Vehicle_sub_category, Vehicle_category, Vehicle_company, Vehicle_model, Vehicle_images
+from user.models import CustomUser
 
 class vehicle_category_serializer(serializers.ModelSerializer):
     class Meta:
@@ -84,5 +85,20 @@ class vehicle_registraion_serializer(serializers.Serializer):
     image = serializers.ImageField(required=True)
 
 
+class CustomUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['email','first_name','contact_number','social_rank']
+    
+class VehicleImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vehicle_images
+        fields = ['image']
 
-# {"vehicle_model_id":{"vehicle_company_id":{"company_name":"hero"},"vehicle_sub_category_id":{"vehicle_category_id":{"vehicle_category":"TWO_WHEELER"},"vehicle_sub_category":"BIKE"},"color":"black","vehicle_model_name":"splender"},"vehicle_no":"10/123/20012","available_to":"2023-10-10","rent":2000}
+class VehicleList(serializers.ModelSerializer):
+    user_id = CustomUserSerializer()
+    vehicle_images_set = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    class Meta:
+        model = Vehicles
+        fields = '__all__'
+

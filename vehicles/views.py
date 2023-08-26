@@ -3,8 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db import transaction
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .serializer import vehicle_registraion_serializer, vehicle_category_serializer,vehicle_sub_category_serializer,vehicle_company_serializer,vehicle_model_serializer, vehicles_serializer
-from .models import Vehicle_images
+from .serializer import vehicle_registraion_serializer, vehicle_category_serializer,vehicle_sub_category_serializer,vehicle_company_serializer,vehicle_model_serializer, vehicles_serializer, VehicleList
+from .models import Vehicle_images, Vehicles
 # Create your views here.
 
 
@@ -64,11 +64,19 @@ class register_vehicle(APIView):
         # multiple images
         images = request.FILES.getlist('image')
         for img in images:
-            print(img)
             new_image = Vehicle_images(image=img, vehicle_id=vehicle_instance)
             new_image.save()
         return Response(serializer.data)
 
 
+class GetVehicles(APIView):
 
-        
+    permission_classes = [AllowAny]
+    serializer_class = VehicleList
+    def get(self, request, format=None):
+        vehicle_list = Vehicles.objects.all()
+        serializer = self.serializer_class(vehicle_list, many=True)
+        print(serializer.data)
+        return Response(serializer.data, status=200)
+
+
