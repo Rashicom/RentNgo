@@ -96,9 +96,10 @@ class VehicleImageSerializer(serializers.ModelSerializer):
         fields = ['image']
 
 class VehicleList(serializers.ModelSerializer):
-    user_id = CustomUserSerializer()
-    vehicle_images_set = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    user = CustomUserSerializer(source='user_id')
+    vehicle_images = VehicleImageSerializer(many=True, read_only=True, source='vehicle_images_set')
     class Meta:
         model = Vehicles
-        fields = '__all__'
+        fields = ['vehicle_id','user','vehicle_model_id','vehicle_no','available_from','available_to','is_available','rent','vehicle_images']
+        depth = 2
 

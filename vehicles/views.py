@@ -73,10 +73,19 @@ class GetVehicles(APIView):
 
     permission_classes = [AllowAny]
     serializer_class = VehicleList
-    def get(self, request, format=None):
-        vehicle_list = Vehicles.objects.all()
+    def get(self,request, format=None,*args, **kwargs):
+
+        vehicle_id = request.query_params.get('vehicle_id')
+        print(vehicle_id)
+        
+        if vehicle_id:
+            vehicle_list = Vehicles.objects.filter(pk=vehicle_id)
+        else:
+            vehicle_list = Vehicles.objects.all()
         serializer = self.serializer_class(vehicle_list, many=True)
         print(serializer.data)
         return Response(serializer.data, status=200)
+
+
 
 
