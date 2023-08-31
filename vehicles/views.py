@@ -74,18 +74,78 @@ class GetVehicles(APIView):
     permission_classes = [AllowAny]
     serializer_class = VehicleList
     def get(self,request, format=None,*args, **kwargs):
-
+        """
+        accepting a vehicle id from query params and return vehicle informaton of the specific vehicle
+        if vehicle_id not provided this return all vehicles
+        """
         vehicle_id = request.query_params.get('vehicle_id')
         print(vehicle_id)
         
+        # geting vehicle info according to the vehicle_id provided or not
         if vehicle_id:
             vehicle_list = Vehicles.objects.filter(pk=vehicle_id)
         else:
             vehicle_list = Vehicles.objects.all()
+        
+        # serializing and returning response
         serializer = self.serializer_class(vehicle_list, many=True)
         print(serializer.data)
         return Response(serializer.data, status=200)
 
 
 
+class GetAvailableVehicles(APIView):
 
+    permission_classes = [AllowAny]
+    serializer_class = VehicleList
+
+    def get(self,request, format=None,*args, **kwargs):
+        """
+        accepting a vehicle id from query params and return vehicle informaton of the specific vehicle
+        if vehicle_id not provided this return all vehicles
+        this is only returning available vehicles
+        """
+        vehicle_id = request.query_params.get('vehicle_id')
+        print(vehicle_id)
+        
+        # geting vehicle info according to the vehicle_id provided or not
+        if vehicle_id:
+            vehicle_list = Vehicles.objects.filter(pk=vehicle_id, is_available=True)
+        else:
+            vehicle_list = Vehicles.objects.filter(is_available=True)
+        
+        # serializing and returing respose
+        serializer = self.serializer_class(vehicle_list, many=True)
+        print(serializer.data)
+        return Response(serializer.data, status=200)
+
+
+
+class GetUserVehicles(APIView):
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = VehicleList
+    
+    def get(self, request, format=None):
+        """
+        filtering vehicles of the authenticated user and return
+        if  available=True  return all vehicle which is available of the user
+        if  available=False retunt all vehicle which is not available
+        if available parameter not provided it returns all
+        """
+        available = request.query_params.get("available")
+        user = request.user
+
+        # filtering using available state
+        if  available:
+            vehicles_list = Vehicles.objects.filter(user_id = user, is_available=available)
+        
+        # if available not  given retuns all vehicle of he user
+        else:
+            vehicles_list = Vehicles.objects.filter(user_id = user)
+
+        serializer = self.serializer_class(vehicles_list, many=True)
+        return Response(serializer.data, status=200)
+        
+        
+        
