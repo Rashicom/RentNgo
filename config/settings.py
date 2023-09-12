@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'user',
     'vehicles',
     'rental_management',
+    'renting',
     
     
 ]
