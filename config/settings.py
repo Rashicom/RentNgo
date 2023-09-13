@@ -44,6 +44,10 @@ INSTALLED_APPS = [
     'vehicles',
     'rental_management',
     'renting',
+    'chat',
+    'channels',
+    'corsheaders'
+
     
     
 ]
@@ -51,6 +55,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -159,3 +166,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # custom user authentication override
 AUTH_USER_MODEL = "user.Customuser"
+
+
+# cors config
+# only for development stage
+# WARNING: not recommented allowing all cors in production
+CORS_ALLOW_ALL_ORIGINS = True
