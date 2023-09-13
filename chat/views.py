@@ -58,7 +58,7 @@ class GetConversations(APIView):
 
     authentication_classes = []
     permission_classes = []
-    serializer_class = 0
+    serializer_class = ConversationSerializer
 
     def get(self, request, format=None):
         """
@@ -74,7 +74,7 @@ class GetConversations(APIView):
         # fetching conversation from database
         conversation = Conversation.objects.filter(conversation_id=conversation_id)
         
-        # if conversation found serialize and return
+        # if conversation exist serialize and return
         if conversation.exists():
             serializer = self.serializer_class(conversation[0])
             return Response(serializer.data, status=200)
@@ -83,6 +83,33 @@ class GetConversations(APIView):
         else:
             return Response({"details":"conversation does not found, pleace check the conversation_id"})
 
+
+
+class UserConversation(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = ConversationSerializer
+
+    def get(self, request, format=None):
+        """
+        this method is returnins all conversations  of the requested user
+        """
+
+        # fetching user instance
+        user = request.user
+
+        # filter all conversation where user weather initiator or a reciever
+        q_filter = Q(initiator=user) | Q(reciever=user)
+        conversation = Conversation.objects.filter(q_filter)
+
+        # if conversation exist serialize and return response
+        if conversation.exists():
+            serializer = self.serializer_class(conversation, many=True)
+            return Response(conversation.data, status=200)
+        
+        else:
+            return Response({"details":"no conversation found"})
 
 
 
