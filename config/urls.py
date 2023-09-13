@@ -23,8 +23,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/user/', include("user.urls")),
     path('api/vehicles/', include("vehicles.urls")),
-    path('renting/',include("renting.urls")),
-    path('chat/',include("chat.urls")),
+    path('api/renting/',include("renting.urls")),
+    path('api/chat/',include("chat.urls")),
     
     
     

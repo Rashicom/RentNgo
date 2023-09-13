@@ -6,7 +6,7 @@ from user.models import CustomUser
 class UserSerilaizer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = '__all__'
+        fields = ['email','contact_number','profile_photo']
 
 
 # conversation serializer
@@ -15,4 +15,5 @@ class ConversationSerializer(serializers.ModelSerializer):
     reciever = UserSerilaizer()
     class Meta:
         model = Conversation
-        fields = ['initiator','reciever','start_time']
+        fields = ['conversation_id','initiator','reciever','start_time']
+        

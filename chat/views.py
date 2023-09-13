@@ -3,12 +3,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.urls import reverse
+from django.shortcuts import redirect
 from user.models import CustomUser
 from .models import Conversation
 from .serializers import ConversationSerializer
 from django.db.models import Q
 
-class start_conversation(APIView):
+class StartConversation(APIView):
 
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -30,26 +32,29 @@ class start_conversation(APIView):
 
         # fetching reciever instance for database if exist, else return does not exist message
         try:
-            participant = CustomUser.objects.get(email=reciever.email)
-        
+            participant = CustomUser.objects.get(email=reciever)
+            
         except CustomUser.DoesNotExist:
             return Response({"details":"reciever does not exist"})
         
         # collecting conversation if any
-        q_fiter = Q(initiator=request.user, reciever=reciever) | Q(initiator=reciever, reciever=request.user)
+        q_fiter = Q(initiator=request.user.id, reciever=participant.id) | Q(initiator=participant.id, reciever=request.user.id)
         conversation = Conversation.objects.filter(q_fiter)
         
         # if any conversation already exist, fetch the history and return
         if conversation.exists():
-            pass
+            print("conversation found")
+            serializer = self.serializer_class(conversation[0])
+            
         
         # if no conversation exists, create new conversation
         else:
-            conversation = Conversation.objects.create(initiator=request.user, reciever=request.user, reciever=reciever)
+            conversation = Conversation.objects.create(initiator=request.user, reciever=participant)
             
-            # serialize and return response
+            # serialize
             serializer = self.serializer_class(conversation)
-            return Response(serializer.data, status=201)
+        
+        return Response(serializer.data, status=201)
 
     
 
@@ -106,7 +111,7 @@ class UserConversation(APIView):
         # if conversation exist serialize and return response
         if conversation.exists():
             serializer = self.serializer_class(conversation, many=True)
-            return Response(conversation.data, status=200)
+            return Response(serializer.data, status=200)
         
         else:
             return Response({"details":"no conversation found"})

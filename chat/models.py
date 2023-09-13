@@ -22,5 +22,5 @@ class Messages(models.Model):
 
     # order the message based on the time they send
     class Meta:
-        ordering = ('-timestamp')
+        ordering = ('-timestamp',)
 
