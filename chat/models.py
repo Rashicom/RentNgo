@@ -1,5 +1,6 @@
 from django.db import models
 from user.models import CustomUser
+import uuid
 
 # Create your models here.
 # one to one communication database
@@ -7,6 +8,7 @@ from user.models import CustomUser
 
 class Conversation(models.Model):
     conversation_id = models.AutoField(primary_key=True)
+    room = models.UUIDField(default=uuid.uuid4, unique=True)
     initiator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='convo_starter')
     reciever = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='convo_participant')
     start_time = models.DateTimeField(auto_now_add=True)

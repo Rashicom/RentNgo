@@ -6,7 +6,10 @@ class ChatConsumer(WebsocketConsumer):
 
     def connect(self):
         print("connecting ....")
+        user = self.scope["user"]
+        print(user)
         self.accept()
+        
 
     def disconnect(self, close_code):
         pass
