@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.shortcuts import redirect
 from user.models import CustomUser
 from .models import Conversation
-from .serializers import ConversationSerializer
+from .serializers import ConversationSerializer, ConversationMessageSerializer
 from django.db.models import Q
 
 class StartConversation(APIView):
@@ -67,19 +67,25 @@ class GetConversations(APIView):
 
     def get(self, request, format=None):
         """
-        accept kwargs: conversation_id
+        accept kwargs: room
 
-        it returns the conversation matched with the given conversation_id
+        it returns the conversation matched with the given room
         """
 
         # fetching conversation_id and user
-        conversation_id = request.query_params.get('conversation_id')
+        room = request.query_params.get('room')
         user = request.user
+        if not room:
+            return Response({"detalils":"room does not provided"})
 
         # fetching conversation from database
-        conversation = Conversation.objects.filter(conversation_id=conversation_id)
-        
+        try:
+            conversation = Conversation.objects.filter(room=room)
+        except Exception as e:
+            print(e)
+            return Response({"details":"invalied uuid"})
         # if conversation exist serialize and return
+        
         if conversation.exists():
             serializer = self.serializer_class(conversation[0])
             return Response(serializer.data, status=200)
@@ -118,4 +124,39 @@ class UserConversation(APIView):
 
 
 
+class GetChatHistrory(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = ConversationMessageSerializer
+
+    def get(self, request, format=None):
+        """
+        accept: room
+        this method returning chat history of the given room
+        """
+
+        # fetching data
+        user = request.user
+        room = request.query_params.get("room")
+        if not room:
+            return Response({"details":"room not provided"})
+
+        # fetch data from database
+        # we have to fetch only message after asserting the rooms sender or reciever is the user
+        # otherwise user can fectch enyones chat history
+        users_chat_filter = Q(room=room) & (Q(initiator=user) | Q(reciever=user))
+        message_history = Conversation.objects.filter(users_chat_filter)
+
+        # if any history found, serialize and return
+        if message_history.exists():
+            serializer = self.serializer_class(message_history[0])
+            return Response(serializer.data, status=200)
+        # if not found
+        else:
+            return Response({"details":"no such conversation found"}, status=404)
+        
+        
+
+        
 
