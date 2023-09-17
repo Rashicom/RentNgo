@@ -29,6 +29,8 @@ class ChatConsumer(WebsocketConsumer):
         meaning you have to await them. If you need to call them from synchronous code, 
         you'll need to use the handy asgiref.sync.async_to_sync wrapper:
         """
+
+        
         # join room group
         # here async_to_sync(self.channel_layer.group_add) returning another function
         # converting group_add async function to sync function
@@ -39,13 +41,15 @@ class ChatConsumer(WebsocketConsumer):
         # now we are including this websicket connection to send/recive message from room_group_name
         sync_group_add(self.room_group_name,self.channel_name)
         
-        
 
         self.accept()
         
 
     def disconnect(self, close_code):
-        pass
+        # Leave room group
+        async_to_sync(self.channel_layer.group_discard)(
+            self.room_group_name, self.channel_name
+        )
     
 
     # Receive message from WebSocket
@@ -79,6 +83,7 @@ class ChatConsumer(WebsocketConsumer):
         # another user and functin may use the same data, so we have to proserve
         # by coping we assert that original message wont interepted
         text_data_json = event.copy()
+        text_data_json.pop("type")
 
         print(text_data_json)
         
