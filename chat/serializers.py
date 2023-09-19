@@ -15,6 +15,12 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Messages
         fields = ['sender','text','timestamp']
 
+# chating serializer
+class ChatMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Messages
+        fields = '__all__'
+
 
 # conversation serializer
 class ConversationSerializer(serializers.ModelSerializer):
